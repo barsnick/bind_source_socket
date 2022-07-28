@@ -75,64 +75,64 @@ struct sockaddr_in6 local_sockaddr_in6[] = { 0 };
 
 void _init (void)
 {
-        const char *err;
+	const char *err;
 
-        real_bind = dlsym (RTLD_NEXT, "bind");
-        if ((err = dlerror ()) != NULL) {
-                fprintf (stderr, "dlsym (bind): %s\n", err);
-        }
+	real_bind = dlsym (RTLD_NEXT, "bind");
+	if ((err = dlerror ()) != NULL) {
+		fprintf (stderr, "dlsym (bind): %s\n", err);
+	}
 
-        real_connect = dlsym (RTLD_NEXT, "connect");
-        if ((err = dlerror ()) != NULL) {
-                fprintf (stderr, "dlsym (connect): %s\n", err);
-        }
+	real_connect = dlsym (RTLD_NEXT, "connect");
+	if ((err = dlerror ()) != NULL) {
+		fprintf (stderr, "dlsym (connect): %s\n", err);
+	}
 
-        inaddr_any_saddr = htonl (INADDR_ANY);
-        if (bind_addr_env = getenv ("BIND_ADDR")) {
-                bind_addr_saddr = inet_addr (bind_addr_env);
-                local_sockaddr_in->sin_family = AF_INET;
-                local_sockaddr_in->sin_addr.s_addr = bind_addr_saddr;
-                local_sockaddr_in->sin_port = htons (0);
-        }
-        if (bind_addr6_env = getenv ("BIND_ADDR6")) {
-                if (inet_pton(AF_INET6, bind_addr6_env, bind_addr_saddr6) > 0) {
-                        local_sockaddr_in6->sin6_family = AF_INET6;
-                        memcpy(local_sockaddr_in6->sin6_addr.s6_addr, bind_addr_saddr6, 16);
-                        local_sockaddr_in6->sin6_port = htons (0);
-                }
-        }
+	inaddr_any_saddr = htonl (INADDR_ANY);
+	if (bind_addr_env = getenv ("BIND_ADDR")) {
+		bind_addr_saddr = inet_addr (bind_addr_env);
+		local_sockaddr_in->sin_family = AF_INET;
+		local_sockaddr_in->sin_addr.s_addr = bind_addr_saddr;
+		local_sockaddr_in->sin_port = htons (0);
+	}
+	if (bind_addr6_env = getenv ("BIND_ADDR6")) {
+		if (inet_pton(AF_INET6, bind_addr6_env, bind_addr_saddr6) > 0) {
+			local_sockaddr_in6->sin6_family = AF_INET6;
+			memcpy(local_sockaddr_in6->sin6_addr.s6_addr, bind_addr_saddr6, 16);
+			local_sockaddr_in6->sin6_port = htons (0);
+		}
+	}
 }
 
 int bind (int fd, const struct sockaddr *sk, socklen_t sl)
 {
 
-/*      printf("bind: %d %s:%d\n", fd, inet_ntoa (lsk_in->sin_addr.s_addr),
-                ntohs (lsk_in->sin_port));*/
-        if ((sk->sa_family == AF_INET) && (bind_addr_env)) {
-                static struct sockaddr_in *lsk_in;
-                lsk_in = (struct sockaddr_in *)sk;
-                lsk_in->sin_addr.s_addr = bind_addr_saddr;
-        } else if ((sk->sa_family == AF_INET6) && (bind_addr6_env)) {
-                static struct sockaddr_in6 *lsk_in6;
-                lsk_in6 = (struct sockaddr_in6 *)sk;
-                memcpy(lsk_in6->sin6_addr.s6_addr, bind_addr_saddr6, 16);
-        }
-        return real_bind (fd, sk, sl);
+/*	printf("bind: %d %s:%d\n", fd, inet_ntoa (lsk_in->sin_addr.s_addr),
+		ntohs (lsk_in->sin_port));*/
+	if ((sk->sa_family == AF_INET) && (bind_addr_env)) {
+		static struct sockaddr_in *lsk_in;
+		lsk_in = (struct sockaddr_in *)sk;
+		lsk_in->sin_addr.s_addr = bind_addr_saddr;
+	} else if ((sk->sa_family == AF_INET6) && (bind_addr6_env)) {
+		static struct sockaddr_in6 *lsk_in6;
+		lsk_in6 = (struct sockaddr_in6 *)sk;
+		memcpy(lsk_in6->sin6_addr.s6_addr, bind_addr_saddr6, 16);
+	}
+	return real_bind (fd, sk, sl);
 }
 
 int connect (int fd, const struct sockaddr *sk, socklen_t sl)
 {
 
-/*      printf("connect: %d %s:%d\n", fd, inet_ntoa (rsk_in->sin_addr.s_addr),
-                ntohs (rsk_in->sin_port));*/
-        if ((sk->sa_family == AF_INET) && (bind_addr_env)) {
-                static struct sockaddr_in *rsk_in;
-                rsk_in = (struct sockaddr_in *)sk;
-                real_bind (fd, (struct sockaddr *)local_sockaddr_in, sizeof (struct sockaddr));
-        } else if ((sk->sa_family == AF_INET6) && (bind_addr6_env)) {
-                static struct sockaddr_in6 *rsk_in6;
-                rsk_in6 = (struct sockaddr_in6 *)sk;
-                real_bind (fd, (struct sockaddr *)local_sockaddr_in6, sizeof (struct sockaddr_in6));
-        }
-        return real_connect (fd, sk, sl);
+/*	printf("connect: %d %s:%d\n", fd, inet_ntoa (rsk_in->sin_addr.s_addr),
+		ntohs (rsk_in->sin_port));*/
+	if ((sk->sa_family == AF_INET) && (bind_addr_env)) {
+		static struct sockaddr_in *rsk_in;
+		rsk_in = (struct sockaddr_in *)sk;
+		real_bind (fd, (struct sockaddr *)local_sockaddr_in, sizeof (struct sockaddr));
+	} else if ((sk->sa_family == AF_INET6) && (bind_addr6_env)) {
+		static struct sockaddr_in6 *rsk_in6;
+		rsk_in6 = (struct sockaddr_in6 *)sk;
+		real_bind (fd, (struct sockaddr *)local_sockaddr_in6, sizeof (struct sockaddr_in6));
+	}
+	return real_connect (fd, sk, sl);
 }
