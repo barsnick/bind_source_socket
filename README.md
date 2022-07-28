@@ -1,30 +1,53 @@
-LD_PRELOAD library to make bind and connect to use a virtual
-IP address as localaddress. Specified via the enviroment
-variable BIND_ADDR.
+# Bind a program's TCP source port to a certain address
+## A library to assist Linux/glibc based programs in binding their TCP source port to a certain source address when creating a connection
+
+This library assists Linux/glibc based programs in binding their TCP source port to a certain source address when creating a connection.
+
+# Use cases
+A common use case is when a computer has several outgoing network devices, such as:
+- an Ethernet port and a VPN network device tunneling through it
+- an standard network port and a virtual network device to a virtual machine
+If you want your program to connect to a host, you may want it to use a certain network device (e.g. avoiding the VPN). Linux may not support this for you, deciding by itself which of the possibly routes to take.  The program itself can influence this decision when creating its TCP socket, but the program source may not be under your control, or you don't want to implement such special cases. You could reconfigure your routing to achieve this, but that is a massive manipulation of the system.
+
+# How it works
+This library is loaded into your program and manipulates its socket configuration. It uses the `LD_PRELOAD` mechanism to make `bind()` and `connect()` behave differently, by using the given address as local address.
+
+# Building
 
 Compile on Linux with:
+```
 gcc -nostartfiles -fpic -shared bind.c -o bind.so -ldl -D_GNU_SOURCE
+```
 
+For libc5 you need to replace `socklen_t` with `int` in the source.
 
-Example in bash to make inetd only listen to the localhost
-lo interface, thus disabling remote connections and only
-enable to/from localhost:
+# Usage
+The path to the compiled library (shared object) needs to be available to your program via the `LD_PRELOAD` environment variable.
 
+The address to be used is specified via the enviroment variable `BIND_ADDR`.
+
+## Examples
+Example in bash to make inetd only listen to the localhost `lo` interface, thus disabling remote connections and only enabling to/from localhost:
+
+```
 BIND_ADDR="127.0.0.1" LD_PRELOAD=./bind.so /sbin/inetd
+```
 
 
-Example in bash to use your virtual IP as your outgoing
-sourceaddress for ircII:
+Example in bash to use your virtual IP as your outgoing source address for the program `ircII`:
 
+```
 BIND_ADDR="your-virt-ip" LD_PRELOAD=./bind.so ircII
+```
 
-Note that you have to set up your servers virtual IP first.
+Note that you have to set up your server's virtual IP first.
 
+# TODO
+TODO: I would like to extend it to the accept() calls too, like a general TCP wrapper. Also like a junkbuster for web banners.
 
-This program was made by Daniel Ryde
-email: daniel@ryde.net
-web:   http://www.ryde.net/
+# Credits
+This program was made by Daniel Ryde  
+email: `daniel@ryde.net`  
+web:   `http://www.ryde.net/`
 
-TODO: I would like to extend it to the accept calls too, like a
-general tcp-wrapper. Also like an junkbuster for web-banners.
-For libc5 you need to replace socklen_t with int.
+This README was created from a comment in the original source, and modified by Moritz Barsnick.
