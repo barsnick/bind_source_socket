@@ -24,7 +24,18 @@ For libc5 you need to replace `socklen_t` with `int` in the source.
 # Usage
 The path to the compiled library (shared object) needs to be available to your program via the `LD_PRELOAD` environment variable.
 
-The address to be used is specified via the enviroment variable `BIND_ADDR`.
+All sockets opened by the program will be affected. Here are the variables to manipulate their options:
+
+- Listening sockets:
+  - The address to be used is specified via the enviroment variable `BIND_ADDR` (default: chosen by operating system).
+  - The port to be used is specified via the enviroment variable `BIND_PORT` (default: chosen by operating system).
+  - The type of sockets to modify is specified via the enviroment variable `BIND_TYPE` (possible values: `TCP`, `UDP`, `RAW`, `PACKET`; default: all).
+  - The ports *not* to be modified are specified via the enviroment variable `EXCLUDE_PORTS` (possible value: comma separated list of ports; default: none).
+- Connecting sockets:
+  - The address to be used is specified via the enviroment variable `CONNECT_BIND_ADDR` (default: chosen by operating system).
+  - The port to be used is specified via the enviroment variable `CONNECT_BIND_PORT` (default: chosen by operating system).
+  - The type of sockets to modify is specified via the enviroment variable `CONNECT_TYPE` (possible values: `TCP`, `UDP`, `RAW`, `PACKET`; default: all).
+  - The ports *not* to be modified are specified via the enviroment variable `EXCLUDE_PORTS` (possible value: comma separated list of ports; default: none).
 
 ## Examples
 Example in bash to make inetd only listen to the localhost `lo` interface, thus disabling remote connections and only enabling to/from localhost:
@@ -37,7 +48,7 @@ BIND_ADDR="127.0.0.1" LD_PRELOAD=./bind.so /sbin/inetd
 Example in bash to use your virtual IP as your outgoing source address for the program `ircII`:
 
 ```
-BIND_ADDR="your-virt-ip" LD_PRELOAD=./bind.so ircII
+BIND_ADDR="your-virt-ip" CONNECT_ADDR="your-virt-ip" LD_PRELOAD=./bind.so ircII
 ```
 
 Note that you have to set up your server's virtual IP first.
@@ -49,5 +60,8 @@ TODO: I would like to extend it to the accept() calls too, like a general TCP wr
 This program was made by Daniel Ryde  
 email: `daniel@ryde.net`  
 web:   `http://www.ryde.net/`
+
+The additional binding options functionality was added by Uranus Zhou ([GitHub "zohead"](https://github.com/zohead)).
+It is originally hosted here: https://gist.github.com/zohead/9950663ca01952c940eb.
 
 This README was created from a comment in the original source, and modified by Moritz Barsnick.
