@@ -18,6 +18,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <dlfcn.h>
 #include <errno.h>
 #include <string.h>
@@ -59,30 +60,30 @@ void _init (void)
 		fprintf (stderr, "dlsym (connect): %s\n", err);
 	}
 
-	if (bind_addr_env = getenv ("BIND_ADDR"))
+	if ((bind_addr_env = getenv ("BIND_ADDR")))
 		bind_addr_saddr = inet_addr (bind_addr_env);
 
-	if (bind_port_env = getenv ("BIND_PORT"))
+	if ((bind_port_env = getenv ("BIND_PORT")))
 		bind_port_ns = htons (atoi(bind_port_env));
 
-	if (bind_type_env = getenv ("BIND_TYPE"))
+	if ((bind_type_env = getenv ("BIND_TYPE")))
 		bind_type = get_sock_type(bind_type_env);
 
 	exclude_ports_env = getenv ("EXCLUDE_PORTS");
 
-	if (connect_port_env = getenv ("CONNECT_PORT"))
+	if ((connect_port_env = getenv ("CONNECT_PORT")))
 		connect_port_ns = htons (atoi(connect_port_env));
 
-	if (connect_type_env = getenv ("CONNECT_TYPE"))
+	if ((connect_type_env = getenv ("CONNECT_TYPE")))
 		connect_type = get_sock_type(connect_type_env);
 
-	if (connect_bind_addr_env = getenv ("CONNECT_BIND_ADDR")) {
+	if ((connect_bind_addr_env = getenv ("CONNECT_BIND_ADDR"))) {
 		local_sockaddr_in->sin_family = AF_INET;
 		local_sockaddr_in->sin_addr.s_addr = inet_addr (connect_bind_addr_env);
 		local_sockaddr_in->sin_port = htons (0);
 	}
 
-	if (connect_bind_port_env = getenv ("CONNECT_BIND_PORT"))
+	if ((connect_bind_port_env = getenv ("CONNECT_BIND_PORT")))
 		local_sockaddr_in->sin_port = htons (atoi(connect_bind_port_env));
 }
 
@@ -112,7 +113,8 @@ int bind (int fd, const struct sockaddr *sk, socklen_t sl)
 
 	lsk_in = (struct sockaddr_in *)sk;
 	if (lsk_in->sin_family == AF_INET || lsk_in->sin_family == AF_INET6) {
-		int type, length = sizeof(int);
+		int type;
+		socklen_t length = sizeof(int);
 
 		getsockopt(fd, SOL_SOCKET, SO_TYPE, &type, &length);
 
@@ -135,7 +137,8 @@ int connect (int fd, const struct sockaddr *sk, socklen_t sl)
 
 	rsk_in = (struct sockaddr_in *)sk;
 	if (rsk_in->sin_family == AF_INET || rsk_in->sin_family == AF_INET6) {
-		int type, length = sizeof(int);
+		int type;
+		socklen_t length = sizeof(int);
 
 		getsockopt(fd, SOL_SOCKET, SO_TYPE, &type, &length);
 
