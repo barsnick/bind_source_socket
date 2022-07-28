@@ -24,7 +24,7 @@ For libc5 you need to replace `socklen_t` with `int` in the source.
 # Usage
 The path to the compiled library (shared object) needs to be available to your program via the `LD_PRELOAD` environment variable.
 
-The address to be used is specified via the enviroment variable `BIND_ADDR`.
+The address to be used is specified via the enviroment variable `BIND_ADDR`, or via the enviroment variable `BIND_ADDR6` for IPv6.
 
 ## Examples
 Example in bash to make inetd only listen to the localhost `lo` interface, thus disabling remote connections and only enabling to/from localhost:
@@ -49,5 +49,8 @@ TODO: I would like to extend it to the accept() calls too, like a general TCP wr
 This program was made by Daniel Ryde  
 email: `daniel@ryde.net`  
 web:   `http://www.ryde.net/`
+
+The IPv6 functionality was added by [GitHub "xperia64"](https://github.com/xperia64).
+It is originally hosted here: https://gist.github.com/xperia64/4bf836ac526530de67b5984f80285bf8.
 
 This README was created from a comment in the original source, and modified by Moritz Barsnick.
