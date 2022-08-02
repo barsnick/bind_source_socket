@@ -6,7 +6,8 @@ This library assists Linux/glibc based programs in binding their TCP source port
 # Use cases
 A common use case is when a computer has several outgoing network devices, such as:
 - an Ethernet port and a VPN network device tunneling through it
-- an standard network port and a virtual network device to a virtual machine
+- a standard network port and a virtual network device to a virtual machine
+
 If you want your program to connect to a host, you may want it to use a certain network device (e.g. avoiding the VPN). Linux may not support this for you, deciding by itself which of the possibly routes to take.  The program itself can influence this decision when creating its TCP socket, but the program source may not be under your control, or you don't want to implement such special cases. You could reconfigure your routing to achieve this, but that is a massive manipulation of the system.
 
 # How it works
